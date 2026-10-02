@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#002244">
+  <title>C.C. Calculadora de Cable - Luz del Sur</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <main class="mobile-wrapper">
+    <!-- Encabezado Luz del Sur -->
+    <header class="app-header">
+      <div class="brand-bar">
+        <div class="logo-container">
+          <!-- Logo Luz del Sur SVG -->
+          <svg class="logo-icon" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="50" cy="50" r="48" fill="#003865"/>
+            <!-- Símbolo de arco/onda de energía en amarillo LDS -->
+            <path d="M22 68C26 48 42 32 64 30C75 29 82 32 82 32C82 32 74 38 68 44C52 46 38 56 34 72L22 68Z" fill="#FFB81C"/>
+            <path d="M30 76C34 60 48 48 66 48C74 48 80 50 80 50C80 50 73 54 68 58C56 60 46 68 42 80L30 76Z" fill="#FFE082"/>
+            <circle cx="68" cy="28" r="8" fill="#FFB81C"/>
+          </svg>
+          <div class="logo-text-wrap">
+            <span class="company-name">LUZ DEL SUR</span>
+            <span class="company-sub">DISTRIBUCIÓN ELÉCTRICA</span>
+          </div>
+        </div>
+
+        <div class="date-box" id="dateBox" title="Fecha de cálculo (Automática)">
+          <span>📅</span>
+          <span id="displayFecha" class="date-text">--/--/----</span>
+        </div>
+      </div>
+
+      <div class="app-title-row">
+        <h1 class="app-title">
+          <span>C.C. CALCULADORA</span>
+        </h1>
+        <span class="badge-tag">Cables BT / MT</span>
+      </div>
+    </header>
+
+    <div class="app-content">
+
+      <!-- 1. CONFIGURACIÓN GENERAL -->
+      <section class="section-card section-general">
+        <div class="section-header">
+          <span>⚙️ Configuración General</span>
+        </div>
+        <div class="section-body">
+          <div class="grid-2">
+            <!-- SED con Autocompletado / Filtro -->
+            <div class="form-group sed-autocomplete-wrap">
+              <label for="inputSed">SED <small>(Filtrar código)</small></label>
+              <div class="input-with-action">
+                <input type="text" id="inputSed" class="form-control" placeholder="Ej: 00021S" maxlength="10" autocomplete="off" />
+                <button type="button" id="btnClearSed" class="btn-clear-input" title="Limpiar SED" style="display: none;">&times;</button>
+              </div>
+              <div id="sedDropdown" class="autocomplete-dropdown" style="display: none;"></div>
+            </div>
+
+            <!-- Celda -->
+            <div class="form-group">
+              <label for="inputCelda">Celda <small>(1 car. máx)</small></label>
+              <input type="text" id="inputCelda" class="form-control" placeholder="Ej: A, 1" maxlength="1" autocomplete="off" />
+            </div>
+          </div>
+
+          <div class="grid-2" style="margin-top: 10px;">
+            <!-- Cantidad de Configuraciones -->
+            <div class="form-group">
+              <label for="inputCantConf">Cant. Conf. <small>(1 al 9)</small></label>
+              <input type="text" id="inputCantConf" class="form-control" placeholder="1" maxlength="1" inputmode="numeric" autocomplete="off" />
+            </div>
+
+            <!-- Material de Cable -->
+            <div class="form-group">
+              <label>Material de Cable</label>
+              <div class="pill-selector">
+                <div class="pill-option">
+                  <input type="radio" id="matCobre" name="material" value="Cobre" checked>
+                  <label for="matCobre" class="pill-label">Cobre</label>
+                </div>
+                <div class="pill-option">
+                  <input type="radio" id="matAluminio" name="material" value="Aluminio">
+                  <label for="matAluminio" class="pill-label">Aluminio</label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. CONFIGURACIONES DE CABLE -->
+      <section class="section-card">
+        <div class="section-header">
+          <span>⚡ Configuraciones de Cable</span>
+          <button type="button" id="btnVerTabla" class="btn-outline" style="height: 24px; padding: 0 8px; font-size: 10px; border-radius: 4px;">
+            📖 Ver Tabla
+          </button>
+        </div>
+        <div class="section-body">
+          <div id="configList" class="configurations-list">
+            <!-- Filas dinámicas generadas por JS -->
+          </div>
+          <div id="emptyState" class="empty-state" style="display: none;">
+            Ingresa un número en "Cant. Conf." (1 - 9) para desplegar las configuraciones de cable.
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. CARGAS Y LÍMITES -->
+      <section class="section-card">
+        <div class="section-header">
+          <span>📊 Cargas y Límites (Amperios)</span>
+        </div>
+        <div class="section-body">
+          <div class="charges-grid">
+            <div class="phase-card">
+              <span class="phase-label">Fase R</span>
+              <input type="number" id="inputR" class="form-control phase-input" placeholder="0.00" step="0.01" min="0" inputmode="decimal">
+            </div>
+
+            <div class="phase-card">
+              <span class="phase-label">Fase S</span>
+              <input type="number" id="inputS" class="form-control phase-input" placeholder="0.00" step="0.01" min="0" inputmode="decimal">
+            </div>
+
+            <div class="phase-card">
+              <span class="phase-label">Fase T</span>
+              <input type="number" id="inputT" class="form-control phase-input" placeholder="0.00" step="0.01" min="0" inputmode="decimal">
+            </div>
+
+            <div class="max-current-card">
+              <span class="phase-label" style="color: var(--lds-blue-primary);">I. Máx (A)</span>
+              <input type="text" id="inputMaxCurrent" class="form-control disabled phase-input" value="0.00 A" readonly>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. F.U. CABLE / RESULTADO -->
+      <section class="section-card result-card">
+        <div class="section-header" style="background: var(--lds-blue-primary); color: #ffffff;">
+          <span>🎯 F.U. Cable / Resultado</span>
+        </div>
+        <div class="section-body">
+          <div class="fu-display-container">
+            <!-- Fórmula y cálculo gráfico -->
+            <div class="fu-fraction-box">
+              <div class="fraction-formula">
+                <span class="fraction-top" id="fuTopValue">0.00 A</span>
+                <span class="fraction-bottom" id="fuBottomValue">0.00 A</span>
+              </div>
+
+              <div class="fraction-arrow">➔</div>
+
+              <div class="fu-metric-badge" id="fuMetricBadge">
+                <div class="fu-metric-value" id="fuPercentage">0.00%</div>
+                <div class="fu-metric-label">F.U. Cable</div>
+              </div>
+            </div>
+
+            <!-- Semáforo Dinámico -->
+            <div id="fuStatusBanner" class="status-banner normal">
+              <span id="fuStatusIcon">ℹ️</span>
+              <div id="fuStatusText">Ingrese configuraciones y cargas R, S, T para calcular.</div>
+            </div>
+
+            <!-- Barra de capacidad -->
+            <div class="progress-wrap">
+              <div id="progressBarFill" class="progress-bar-fill"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Acciones Rápidas -->
+      <div class="action-buttons">
+        <button type="button" id="btnCopiar" class="btn btn-primary">
+          📋 Copiar Reporte
+        </button>
+        <button type="button" id="btnLimpiar" class="btn btn-outline">
+          🔄 Limpiar
+        </button>
+      </div>
+
+      <footer class="app-footer">
+        <p>Calculadora Técnica de Conductor © Luz del Sur ││ Elaborado por DCV Company</p>
+      </footer>
+
+    </div>
+  </main>
+
+  <!-- Modal Tabla Maestra de Cables -->
+  <div id="modalTabla" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>Tabla Maestra de Capacidad de Cables</h3>
+        <button type="button" id="btnCerrarModal" class="close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <table class="table-responsive">
+          <thead>
+            <tr>
+              <th>Tipo</th>
+              <th>Secc. (mm²)</th>
+              <th>Capacidad</th>
+            </tr>
+          </thead>
+          <tbody id="modalTableBody">
+            <!-- Llenado dinámicamente -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script src="cables-data.js"></script>
+  <script src="sed-data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
