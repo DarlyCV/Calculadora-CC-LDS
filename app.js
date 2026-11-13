@@ -1,6 +1,7 @@
 /**
  * Aplicación de Calculadora de Capacidad de Cables
  * Identidad visual y técnica: Luz del Sur
+ * Lógica con Factor de Agrupamiento y Corriente I aire por terna
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -14,6 +15,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const configList = document.getElementById('configList');
   const emptyState = document.getElementById('emptyState');
   const materialRadios = document.querySelectorAll('input[name="material"]');
+
+  // Resumen de agrupamiento
+  const agrupamientoSummaryBox = document.getElementById('agrupamientoSummaryBox');
+  const lblTotalTernas = document.getElementById('lblTotalTernas');
+  const lblFactorAgrup = document.getElementById('lblFactorAgrup');
+  const lblFormulaExplicada = document.getElementById('lblFormulaExplicada');
 
   // Cargas
   const inputR = document.getElementById('inputR');
@@ -48,13 +55,14 @@ document.addEventListener('DOMContentLoaded', () => {
     displayFecha.textContent = fechaHoy;
   }
 
-  // 2. Llenar tabla del modal con CABLES_DATABASE (Solo Tipo, Secc. y Capacidad)
+  // 2. Llenar tabla del modal con CABLES_DATABASE (Cable, Sección, I aire, Concatenar)
   if (typeof CABLES_DATABASE !== 'undefined' && modalTableBody) {
     modalTableBody.innerHTML = CABLES_DATABASE.map(c => `
       <tr>
         <td><strong>${c.tipo}</strong></td>
         <td>${c.seccion}</td>
         <td><strong>${c.capacidad} A</strong></td>
+        <td><code>${c.concatenar}</code></td>
       </tr>
     `).join('');
   }
@@ -92,7 +100,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let html = '';
 
     displayMatches.forEach(sed => {
-      // Resaltar la coincidencia sutilmente
       const regex = new RegExp(`(${cleanQuery})`, 'gi');
       const highlighted = sed.replace(regex, '<mark>$1</mark>');
       html += `
@@ -211,12 +218,14 @@ document.addEventListener('DOMContentLoaded', () => {
     
     if (count <= 0) {
       emptyState.style.display = 'block';
+      if (agrupamientoSummaryBox) agrupamientoSummaryBox.style.display = 'none';
       configsState = [];
       recalculateAll();
       return;
     }
 
     emptyState.style.display = 'none';
+    if (agrupamientoSummaryBox) agrupamientoSummaryBox.style.display = 'flex';
 
     const currentMaterial = getSelectedMaterial();
     const allowedTypes = getAllowedCableTypes(currentMaterial);
@@ -227,7 +236,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const newConfigs = [];
     for (let i = 0; i < count; i++) {
       if (configsState[i]) {
-        // Verificar si el tipo existente es compatible con el material actual
         if (!allowedTypes.includes(configsState[i].tipo)) {
           configsState[i].tipo = defaultTipo;
           configsState[i].seccion = defaultSeccion;
@@ -250,20 +258,17 @@ document.addEventListener('DOMContentLoaded', () => {
       card.className = 'config-item';
       card.dataset.index = index;
 
-      // Asegurar que el tipo esté permitido
       if (!allowedTypes.includes(conf.tipo)) {
         conf.tipo = allowedTypes[0];
       }
 
-      // Obtener secciones disponibles exclusivamente para este tipo
       const sections = SECTIONS_BY_TYPE[conf.tipo] || [];
       if (!sections.includes(Number(conf.seccion))) {
         conf.seccion = sections[0];
       }
 
       const cableInfo = findCable(conf.tipo, conf.seccion);
-      const capUnitaria = cableInfo ? cableInfo.capacidad : 0;
-      const capTotal = capUnitaria * (Number(conf.ternas) || 0);
+      const capBase = (cableInfo ? cableInfo.capacidad : 0) * (Number(conf.ternas) || 0);
       const concatenado = `${conf.tipo}${conf.seccion}`;
 
       card.innerHTML = `
@@ -304,8 +309,8 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="operator">=</div>
 
           <div class="config-input-group">
-            <label>Capacidad</label>
-            <input type="text" class="form-control disabled conf-capacidad" value="${capTotal} A" readonly />
+            <label>I aire × Ternas</label>
+            <input type="text" class="form-control disabled conf-capacidad" value="${capBase} A" readonly />
           </div>
         </div>
       `;
@@ -321,11 +326,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const newTipo = e.target.value;
         conf.tipo = newTipo;
         
-        // Obtener solo las secciones correspondientes a este tipo de cable
         const newSections = SECTIONS_BY_TYPE[newTipo] || [];
         conf.seccion = newSections[0];
 
-        // Actualizar select de sección con las secciones de este tipo exclusivamente
         selectSecc.innerHTML = newSections.map(s => `<option value="${s}">${s}</option>`).join('');
         updateRow();
       });
@@ -364,7 +367,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // 6. Función de cálculo global de F.U. y Corrientes
+  // 6. Función de cálculo global de F.U., Agrupamiento y Corrientes
   function recalculateAll() {
     const valR = parseFloat(inputR.value) || 0;
     const valS = parseFloat(inputS.value) || 0;
@@ -374,22 +377,52 @@ document.addEventListener('DOMContentLoaded', () => {
     const maxCurrent = Math.max(valR, valS, valT);
     inputMaxCurrent.value = maxCurrent > 0 ? `${maxCurrent.toFixed(2)} A` : '0.00 A';
 
-    // Suma de capacidades de todas las configuraciones
-    let sumaCapacidades = 0;
-    configsState.forEach(conf => {
+    // 1. Sumar ternas y calcular suma de capacidad base
+    let totalTernas = 0;
+    let sumaCapacidadesBase = 0;
+    let detalleCalculo = [];
+
+    configsState.forEach((conf, idx) => {
       const cInfo = findCable(conf.tipo, conf.seccion);
+      const ternas = Number(conf.ternas) || 0;
+      totalTernas += ternas;
+
       if (cInfo) {
-        sumaCapacidades += cInfo.capacidad * (Number(conf.ternas) || 0);
+        const capConf = cInfo.capacidad * ternas;
+        sumaCapacidadesBase += capConf;
+        detalleCalculo.push(`${cInfo.capacidad} × ${ternas} = ${capConf}`);
       }
     });
 
-    // Actualizar fórmula visible
+    // 2. Determinar Factor de Agrupamiento según totalTernas
+    const factorAgrup = getFactorAgrupamiento(totalTernas);
+
+    // 3. Capacidad Total Final con Factor de Agrupamiento
+    // Capacidad Total = (Suma de capacidades base) × Factor de Agrupamiento
+    const capacidadTotalFinal = sumaCapacidadesBase * factorAgrup;
+
+    // Actualizar caja de resumen visual de agrupamiento
+    if (lblTotalTernas) lblTotalTernas.textContent = totalTernas;
+    if (lblFactorAgrup) lblFactorAgrup.textContent = factorAgrup.toFixed(2);
+    if (lblFormulaExplicada) {
+      if (configsState.length > 0 && sumaCapacidadesBase > 0) {
+        if (configsState.length === 1) {
+          lblFormulaExplicada.textContent = `(${sumaCapacidadesBase} A) × ${factorAgrup} = ${capacidadTotalFinal.toFixed(2)} A`;
+        } else {
+          lblFormulaExplicada.textContent = `(${sumaCapacidadesBase} A) × ${factorAgrup} [${totalTernas} ternas] = ${capacidadTotalFinal.toFixed(2)} A`;
+        }
+      } else {
+        lblFormulaExplicada.textContent = `(Cap. Base) × F.A. = Capacidad Total`;
+      }
+    }
+
+    // Actualizar fórmula visible en la card de F.U.
     fuTopValue.textContent = `${maxCurrent.toFixed(2)} A`;
-    fuBottomValue.textContent = `${sumaCapacidades.toFixed(2)} A`;
+    fuBottomValue.textContent = `${capacidadTotalFinal.toFixed(2)} A`;
 
     // Cálculo del Factor de Utilización (FU %)
-    if (sumaCapacidades > 0 && maxCurrent > 0) {
-      const fuValue = (maxCurrent / sumaCapacidades) * 100;
+    if (capacidadTotalFinal > 0 && maxCurrent > 0) {
+      const fuValue = (maxCurrent / capacidadTotalFinal) * 100;
       fuPercentage.textContent = `${fuValue.toFixed(2)}%`;
 
       // Barra de progreso visual
@@ -467,12 +500,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const iMax = inputMaxCurrent.value;
     const fu = fuPercentage.textContent;
 
+    let totalTernas = 0;
+    let sumaBase = 0;
     let confsText = '';
+
     configsState.forEach((c, idx) => {
       const cInfo = findCable(c.tipo, c.seccion);
-      const cap = cInfo ? cInfo.capacidad * c.ternas : 0;
-      confsText += `  • Conf. ${idx + 1}: ${c.tipo}${c.seccion} × ${c.ternas} terna(s) = ${cap} A\n`;
+      const ternas = Number(c.ternas) || 0;
+      totalTernas += ternas;
+      const capBase = cInfo ? cInfo.capacidad * ternas : 0;
+      sumaBase += capBase;
+      confsText += `  • Conf. ${idx + 1}: ${c.tipo}${c.seccion} (${cInfo ? cInfo.capacidad : 0} A) × ${ternas} terna(s) = ${capBase} A\n`;
     });
+
+    const fAgrup = getFactorAgrupamiento(totalTernas);
+    const capFinal = sumaBase * fAgrup;
 
     const report = 
 `⚡ REPORTE DE CAPACIDAD DE CABLES - LUZ DEL SUR ⚡
@@ -482,6 +524,11 @@ SED: ${sed} | Celda: ${celda}
 Material Seleccionado: ${material}
 Cantidad de Configuraciones: ${configsState.length}
 ${confsText || '  (Sin configuraciones)\n'}
+FACTOR DE AGRUPAMIENTO:
+  • Total de Ternas: ${totalTernas}
+  • Factor de Agrupamiento: ${fAgrup}
+  • Capacidad Total: (${sumaBase} A) × ${fAgrup} = ${capFinal.toFixed(2)} A
+
 CARGAS DE FASE:
   • Fase R: ${r.toFixed(2)} A
   • Fase S: ${s.toFixed(2)} A
@@ -524,12 +571,10 @@ Generado con Calculadora C.C. Luz del Sur`;
       const numeroTelefono = '012892301';
       const numeroFormateado = '01 2892301';
 
-      // Copiar automáticamente el número al portapapeles
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(numeroTelefono).catch(() => {});
       }
 
-      // Preguntar confirmación para transferir al discador telefónico
       const confirmar = confirm(`¿Desea llamar a Fono Luz al ${numeroFormateado}?\n\nEl número fue copiado y se abrirá el teléfono listo para marcar.`);
       if (confirmar) {
         window.location.href = `tel:${numeroTelefono}`;

@@ -4,38 +4,51 @@ Aplicación web interactiva optimizada para dispositivos móviles diseñada para
 
 ---
 
-## ⚡ Características Principales
+## ⚡ Nueva Lógica Técnica (Corriente I aire + Factor de Agrupamiento)
 
-- **Identidad Visual Oficial**: Paleta de colores institucional de **Luz del Sur** (Azul Marino y Amarillo Energía) con diseño Mobile-First.
-- **Filtro Predictivo de SEDs**: Búsqueda interactiva en tiempo real sobre más de 440 SEDs registradas.
-- **Filtro Dinámico de Conductores**:
-  - **Cobre (Cu)**: `NYY`, `N2XY`
-  - **Aluminio (Al)**: `NA2XY`, `NAYY`
-  - Secciones normalizadas automáticas por tipo de conductor.
-- **Cálculo de Cargas y Capacidad**:
-  - Cálculo de capacidad total por ternas: $\text{Capacidad Unitaria} \times \text{Ternas}$.
-  - Identificación automática de la corriente máxima de fase: $\max(R, S, T)$.
-- **Semáforo Inteligente de Factor de Utilización (F.U.)**:
-  - 🟢 **< 90% (Verde)**: Normal (Capacidad admisible óptima).
-  - 🟡 **90% a 100% (Amarillo)**: Alerta (Carga elevada próxima al límite).
-  - 🔴 **> 100% (Rojo)**: Sobrecarga (Capacidad superada).
-- **Acceso Directo a Fono Luz (`01 2892301`)**:
-  - En caso de sobrecarga (> 100%), permite copiar el teléfono al portapapeles y enlazar la llamada directamente desde el celular.
-- **Herramientas de Terreno**:
-  - Botón **Copiar Reporte** listo para compartir por WhatsApp o correo técnico.
-  - Modal de consulta rápida con la **Tabla Maestra de Capacidad**.
+### 1. Tabla Maestra de Corrientes Admisibles (I aire por terna):
+Valores normalizados para conductores al aire:
+* **N2XY**: 70 (279 A), 120 (400 A), 185 (533 A), 240 (634 A), 300 (736 A), 500 (998 A), 800 (998 A).
+* **NYY**: 70 (250 A), 120 (356 A), 185 (470 A), 240 (562 A), 300 (646 A), 500 (895 A), 800 (895 A).
+* **NA2XY**: 95 (256 A), 120 (300 A), 185 (403 A), 240 (482 A), 300 (558 A), 400 (662 A), 500 (662 A).
+* **NAYY**: 120 (272 A), 185 (363 A), 300 (502 A), 400 (594 A), 500 (691 A).
+
+### 2. Tabla de Factor de Agrupamiento:
+| Ternas Totales | Factor de Agrupamiento (F.A.) |
+| :---: | :---: |
+| 1 | 1.00 |
+| 2 | 0.80 |
+| 3 | 0.70 |
+| 4 | 0.65 |
+| 5 | 0.65 |
+
+### 3. Fórmula de Cálculo:
+$$\text{Capacidad Base Fila } i = I_{\text{aire}} \times \text{Ternas}_i$$
+$$\text{Ternas Totales} = \sum \text{Ternas}_i$$
+$$\text{Capacidad Total Admisible} = \left(\sum \text{Capacidad Base}_i\right) \times \text{Factor de Agrupamiento}(\text{Ternas Totales})$$
+
+#### Ejemplo 1 (1 Configuración):
+* 2 ternas de NYY 500 (895 A):
+  $$\text{Capacidad Total} = (895 \times 2) \times 0.8 = 1790 \times 0.8 = 1432\text{ A}$$
+
+#### Ejemplo 2 (Múltiples Configuraciones):
+* Conf 1: 1 terna NYY 500 (895 A) $\rightarrow 895 \times 1 = 895\text{ A}$
+* Conf 2: 2 ternas N2XY 185 (533 A) $\rightarrow 533 \times 2 = 1066\text{ A}$
+* Ternas totales: $1 + 2 = 3\text{ ternas}$ $\rightarrow \text{F.A.} = 0.7$
+* Capacidad Total:
+  $$(895 + 1066) \times 0.7 = 1961 \times 0.7 = 1372.70\text{ A}$$
 
 ---
 
-## 📁 Estructura del Proyecto
+## 📁 Archivos del Proyecto
 
 ```text
-├── index.html       # Estructura de la aplicación web
-├── style.css        # Estilos móviles y diseño Luz del Sur
-├── app.js           # Lógica de cálculo reactivo y eventos
-├── cables-data.js   # Base de datos de cables y secciones
+├── index.html       # Interfaz con cuadro de Factor de Agrupamiento
+├── style.css        # Estilos móviles y paleta Luz del Sur
+├── app.js           # Lógica matemática con F.A. y F.U.
+├── cables-data.js   # Base de datos de I aire y factores de agrupamiento
 ├── sed-data.js      # Listado maestro oficial de SEDs
-└── README.md        # Documentación del proyecto
+└── README.md        # Documentación técnica
 ```
 
 ---

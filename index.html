@@ -108,6 +108,17 @@
           <div id="emptyState" class="empty-state" style="display: none;">
             Ingresa un número en "Cant. Conf." (1 - 9) para desplegar las configuraciones de cable.
           </div>
+
+          <!-- Resumen de Factor de Agrupamiento y Capacidad Total -->
+          <div id="agrupamientoSummaryBox" class="agrupamiento-summary-box" style="display: none;">
+            <div class="summary-line">
+              <span>Total Ternas: <strong id="lblTotalTernas">0</strong></span>
+              <span>Factor Agrupamiento (F.A.): <strong id="lblFactorAgrup">1.00</strong></span>
+            </div>
+            <div class="summary-formula-line" id="lblFormulaExplicada">
+              (Cap. Base) × F.A. = Capacidad Total
+            </div>
+          </div>
         </div>
       </section>
 
@@ -194,24 +205,43 @@
     </div>
   </main>
 
-  <!-- Modal Tabla Maestra de Cables -->
+  <!-- Modal Tabla Maestra de Cables y Factor de Agrupamiento -->
   <div id="modalTabla" class="modal-overlay">
     <div class="modal-box">
       <div class="modal-header">
-        <h3>Tabla Maestra de Capacidad de Cables</h3>
+        <h3>Tablas Técnicas de Referencia</h3>
         <button type="button" id="btnCerrarModal" class="close-btn">&times;</button>
       </div>
       <div class="modal-body">
-        <table class="table-responsive">
+        <h4 style="font-size: 12px; margin-bottom: 6px; color: var(--lds-blue-primary);">1. I aire por terna (A)</h4>
+        <table class="table-responsive" style="margin-bottom: 14px;">
           <thead>
             <tr>
-              <th>Tipo</th>
-              <th>Secc. (mm²)</th>
-              <th>Capacidad</th>
+              <th>Cable</th>
+              <th>Sección (mm²)</th>
+              <th>I aire/terna (A)</th>
+              <th>Concatenar</th>
             </tr>
           </thead>
           <tbody id="modalTableBody">
             <!-- Llenado dinámicamente -->
+          </tbody>
+        </table>
+
+        <h4 style="font-size: 12px; margin-bottom: 6px; color: var(--lds-blue-primary);">2. Factor de Agrupamiento</h4>
+        <table class="table-responsive">
+          <thead>
+            <tr>
+              <th>Ternas</th>
+              <th>Factor de agrupamiento</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>1</strong></td><td>1.0</td></tr>
+            <tr><td><strong>2</strong></td><td>0.8</td></tr>
+            <tr><td><strong>3</strong></td><td>0.7</td></tr>
+            <tr><td><strong>4</strong></td><td>0.65</td></tr>
+            <tr><td><strong>5</strong></td><td>0.65</td></tr>
           </tbody>
         </table>
       </div>

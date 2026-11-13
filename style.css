@@ -460,6 +460,36 @@ body {
   padding-bottom: 8px;
 }
 
+/* Resumen de Agrupamiento */
+.agrupamiento-summary-box {
+  margin-top: 10px;
+  background: var(--lds-blue-light);
+  border: 1px solid #bdd7f0;
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.agrupamiento-summary-box .summary-line {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--lds-blue-dark);
+  font-weight: 600;
+}
+
+.agrupamiento-summary-box .summary-formula-line {
+  font-size: 11px;
+  color: var(--lds-blue-primary);
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.7);
+  padding: 4px 6px;
+  border-radius: 4px;
+  text-align: center;
+}
+
 /* Cargas Section */
 .charges-grid {
   display: grid;
