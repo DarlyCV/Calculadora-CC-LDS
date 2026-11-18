@@ -16,6 +16,19 @@ document.addEventListener('DOMContentLoaded', () => {
   const emptyState = document.getElementById('emptyState');
   const materialRadios = document.querySelectorAll('input[name="material"]');
 
+  // Transformador
+  const selectTrafoKva = document.getElementById('selectTrafoKva');
+  const inputTrafoMaxA = document.getElementById('inputTrafoMaxA');
+  const trafoFormulaDetail = document.getElementById('trafoFormulaDetail');
+  const lblTrafoFormulaText = document.getElementById('lblTrafoFormulaText');
+
+  // Comparativa Trafo vs Ternas
+  const lblCompTrafoVal = document.getElementById('lblCompTrafoVal');
+  const lblCompTernasVal = document.getElementById('lblCompTernasVal');
+  const compStatusBanner = document.getElementById('compStatusBanner');
+  const compStatusIcon = document.getElementById('compStatusIcon');
+  const compStatusText = document.getElementById('compStatusText');
+
   // Resumen de agrupamiento
   const agrupamientoSummaryBox = document.getElementById('agrupamientoSummaryBox');
   const lblTotalTernas = document.getElementById('lblTotalTernas');
@@ -39,11 +52,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Botones y Modal
   const btnLimpiar = document.getElementById('btnLimpiar');
-  const btnCopiar = document.getElementById('btnCopiar');
+  const btnCopiarCables = document.getElementById('btnCopiarCables');
+  const btnCopiarTrafo = document.getElementById('btnCopiarTrafo');
+  const btnLimpiarTrafo = document.getElementById('btnLimpiarTrafo');
   const btnVerTabla = document.getElementById('btnVerTabla');
   const btnCerrarModal = document.getElementById('btnCerrarModal');
   const modalTabla = document.getElementById('modalTabla');
   const modalTableBody = document.getElementById('modalTableBody');
+
+  // Pestañas de Navegación
+  const tabBtns = document.querySelectorAll('.nav-tab-btn');
+  const tabPanels = document.querySelectorAll('.tab-content-panel');
+
+  tabBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const targetTabId = btn.dataset.tab;
+      
+      tabBtns.forEach(b => b.classList.remove('active'));
+      tabPanels.forEach(p => p.classList.remove('active'));
+
+      btn.classList.add('active');
+      const targetPanel = document.getElementById(targetTabId);
+      if (targetPanel) {
+        targetPanel.classList.add('active');
+      }
+
+      // Re-ejecutar cálculo para refrescar los valores sincronizados
+      recalculateAll();
+    });
+  });
 
   // 1. Inicializar fecha con la fecha del día (No editable)
   const today = new Date();
@@ -468,55 +505,153 @@ document.addEventListener('DOMContentLoaded', () => {
       fuStatusIcon.textContent = 'ℹ️';
       fuStatusText.textContent = 'Ingrese configuraciones y cargas R, S, T para calcular.';
     }
+
+    // 4. Comparativa Transformador vs. Ternas
+    actualizarComparativaTrafoVsTernas(capacidadTotalFinal);
   }
 
-  // 7. Botón Limpiar
-  btnLimpiar.addEventListener('click', () => {
-    if (confirm('¿Desea reiniciar todos los campos de la calculadora?')) {
-      inputSed.value = '';
-      if (btnClearSed) btnClearSed.style.display = 'none';
-      if (sedDropdown) {
-        sedDropdown.style.display = 'none';
-        sedDropdown.innerHTML = '';
+  // Función específica para actualizar la comparativa de Trafo vs Ternas
+  function actualizarComparativaTrafoVsTernas(capacidadTernas) {
+    if (!selectTrafoKva || !inputTrafoMaxA) return;
+
+    const trafoKva = parseFloat(selectTrafoKva.value) || 0;
+    const trafoMaxA = getCapacidadMaxTrafo(trafoKva);
+
+    if (trafoKva > 0) {
+      inputTrafoMaxA.value = `${trafoMaxA.toFixed(2)} A`;
+      if (trafoFormulaDetail) trafoFormulaDetail.style.display = 'block';
+      if (lblTrafoFormulaText) {
+        const iNominal = (trafoKva * FACTOR_I_NOMINAL_TRAFO).toFixed(2);
+        lblTrafoFormulaText.innerHTML = `${trafoKva} kVA × 2.51 = <strong>${iNominal} A</strong> × 1.2 (120%) = <strong>${trafoMaxA.toFixed(2)} A</strong>`;
       }
-      inputCelda.value = '';
-      inputCantConf.value = '';
-      inputR.value = '';
-      inputS.value = '';
-      inputT.value = '';
-      renderConfigurations(0);
+    } else {
+      inputTrafoMaxA.value = '0.00 A';
+      if (trafoFormulaDetail) trafoFormulaDetail.style.display = 'none';
     }
-  });
 
-  // 8. Botón Copiar Reporte
-  btnCopiar.addEventListener('click', () => {
-    const sed = inputSed.value.trim() || 'No especificado';
-    const celda = inputCelda.value.trim() || '-';
-    const material = getSelectedMaterial();
-    const fecha = displayFecha ? displayFecha.textContent : fechaHoy;
-    const r = parseFloat(inputR.value) || 0;
-    const s = parseFloat(inputS.value) || 0;
-    const t = parseFloat(inputT.value) || 0;
-    const iMax = inputMaxCurrent.value;
-    const fu = fuPercentage.textContent;
+    // Actualizar recuadro comparativo
+    if (lblCompTrafoVal) lblCompTrafoVal.textContent = `${trafoMaxA.toFixed(2)} A`;
+    if (lblCompTernasVal) lblCompTernasVal.textContent = `${capacidadTernas.toFixed(2)} A`;
 
-    let totalTernas = 0;
-    let sumaBase = 0;
-    let confsText = '';
+    if (compStatusBanner && compStatusIcon && compStatusText) {
+      compStatusBanner.className = 'status-banner';
 
-    configsState.forEach((c, idx) => {
-      const cInfo = findCable(c.tipo, c.seccion);
-      const ternas = Number(c.ternas) || 0;
-      totalTernas += ternas;
-      const capBase = cInfo ? cInfo.capacidad * ternas : 0;
-      sumaBase += capBase;
-      confsText += `  • Conf. ${idx + 1}: ${c.tipo}${c.seccion} (${cInfo ? cInfo.capacidad : 0} A) × ${ternas} terna(s) = ${capBase} A\n`;
+      if (trafoKva <= 0 && capacidadTernas <= 0) {
+        compStatusBanner.classList.add('normal');
+        compStatusIcon.textContent = 'ℹ️';
+        compStatusText.textContent = 'Seleccione capacidad del transformador y configure ternas para comparar.';
+      } else if (trafoKva <= 0) {
+        compStatusBanner.classList.add('normal');
+        compStatusIcon.textContent = 'ℹ️';
+        compStatusText.textContent = 'Seleccione una potencia de transformador para realizar la comparativa.';
+      } else if (capacidadTernas <= 0) {
+        compStatusBanner.classList.add('normal');
+        compStatusIcon.textContent = 'ℹ️';
+        compStatusText.textContent = 'Configure al menos una terna de cable para realizar la comparativa.';
+      } else {
+        // Evaluación directa de semáforo solicitada:
+        // Si el transformador supera la capacidad de las ternas -> ROJO
+        // Si la capacidad de las ternas es mayor o igual al trafo -> VERDE
+        const dif = trafoMaxA - capacidadTernas;
+
+        if (trafoMaxA > capacidadTernas) {
+          compStatusBanner.classList.add('danger');
+          compStatusIcon.textContent = '⚠️';
+          compStatusText.innerHTML = `
+            <strong>Capacidad de ternas insuficiente:</strong> El transformador al 120% (<strong>${trafoMaxA.toFixed(2)} A</strong>) 
+            supera la capacidad de las ternas (<strong>${capacidadTernas.toFixed(2)} A</strong>) por <strong>${dif.toFixed(2)} A</strong>.
+          `;
+        } else {
+          compStatusBanner.classList.add('normal');
+          compStatusIcon.textContent = '✅';
+          const holgura = capacidadTernas - trafoMaxA;
+          compStatusText.innerHTML = `
+            <strong>Capacidad adecuada:</strong> La capacidad de las ternas (<strong>${capacidadTernas.toFixed(2)} A</strong>) 
+            soporta holgadamente la capacidad máxima del transformador (<strong>${trafoMaxA.toFixed(2)} A</strong>) con <strong>${holgura.toFixed(2)} A</strong> de margen.
+          `;
+        }
+      }
+    }
+  }
+
+  // Evento al cambiar la capacidad del transformador
+  if (selectTrafoKva) {
+    selectTrafoKva.addEventListener('change', () => {
+      recalculateAll();
     });
+  }
 
-    const fAgrup = getFactorAgrupamiento(totalTernas);
-    const capFinal = sumaBase * fAgrup;
+  // 7. Botón Limpiar (Pestaña 1 Cables)
+  if (btnLimpiar) {
+    btnLimpiar.addEventListener('click', () => {
+      if (confirm('¿Desea reiniciar todos los campos de la calculadora de cables?')) {
+        inputSed.value = '';
+        if (btnClearSed) btnClearSed.style.display = 'none';
+        if (sedDropdown) {
+          sedDropdown.style.display = 'none';
+          sedDropdown.innerHTML = '';
+        }
+        inputCelda.value = '';
+        inputCantConf.value = '';
+        inputR.value = '';
+        inputS.value = '';
+        inputT.value = '';
+        renderConfigurations(0);
+      }
+    });
+  }
 
-    const report = 
+  // Botón Limpiar Trafo (Pestaña 2)
+  if (btnLimpiarTrafo) {
+    btnLimpiarTrafo.addEventListener('click', () => {
+      if (confirm('¿Desea reiniciar la selección del transformador?')) {
+        if (selectTrafoKva) selectTrafoKva.value = '';
+        if (inputTrafoMaxA) inputTrafoMaxA.value = '0.00 A';
+        if (trafoFormulaDetail) trafoFormulaDetail.style.display = 'none';
+        recalculateAll();
+      }
+    });
+  }
+
+  // 8. Botón Copiar Reporte: Pestaña 1 (F.U. de Cables)
+  if (btnCopiarCables) {
+    btnCopiarCables.addEventListener('click', () => {
+      const sed = inputSed.value.trim() || 'No especificado';
+      const celda = inputCelda.value.trim() || '-';
+      const material = getSelectedMaterial();
+      const fecha = displayFecha ? displayFecha.textContent : fechaHoy;
+      const r = parseFloat(inputR.value) || 0;
+      const s = parseFloat(inputS.value) || 0;
+      const t = parseFloat(inputT.value) || 0;
+      const iMax = Math.max(r, s, t);
+
+      // Determinar fase con mayor carga
+      let fasesMax = [];
+      if (iMax > 0) {
+        if (r === iMax) fasesMax.push('FASE R');
+        if (s === iMax) fasesMax.push('FASE S');
+        if (t === iMax) fasesMax.push('FASE T');
+      }
+      const faseTxt = fasesMax.length > 0 ? ` (${fasesMax.join(' / ')})` : '';
+
+      let totalTernas = 0;
+      let sumaBase = 0;
+      let confsText = '';
+
+      configsState.forEach((c, idx) => {
+        const cInfo = findCable(c.tipo, c.seccion);
+        const ternas = Number(c.ternas) || 0;
+        totalTernas += ternas;
+        const capBase = cInfo ? cInfo.capacidad * ternas : 0;
+        sumaBase += capBase;
+        confsText += `  • Conf. ${idx + 1}: ${c.tipo}${c.seccion} (${cInfo ? cInfo.capacidad : 0} A) × ${ternas} terna(s) = ${capBase} A\n`;
+      });
+
+      const fAgrup = getFactorAgrupamiento(totalTernas);
+      const capFinal = sumaBase * fAgrup;
+      const fu = fuPercentage.textContent;
+
+      const report = 
 `⚡ REPORTE DE CAPACIDAD DE CABLES - LUZ DEL SUR ⚡
 ------------------------------------------------
 Fecha: ${fecha}
@@ -524,29 +659,79 @@ SED: ${sed} | Celda: ${celda}
 Material Seleccionado: ${material}
 Cantidad de Configuraciones: ${configsState.length}
 ${confsText || '  (Sin configuraciones)\n'}
-FACTOR DE AGRUPAMIENTO:
-  • Total de Ternas: ${totalTernas}
-  • Factor de Agrupamiento: ${fAgrup}
+CAPACIDAD DE CARGA DE LOS CABLES:
   • Capacidad Total: (${sumaBase} A) × ${fAgrup} = ${capFinal.toFixed(2)} A
 
 CARGAS DE FASE:
-  • Fase R: ${r.toFixed(2)} A
-  • Fase S: ${s.toFixed(2)} A
-  • Fase T: ${t.toFixed(2)} A
-  • Corriente Máxima: ${iMax}
+  • Corriente Máxima: ${iMax.toFixed(2)} A${faseTxt}
 
 RESULTADO F.U. CABLE:
   • F.U. = ${fu} (${fuTopValue.textContent} / ${fuBottomValue.textContent})
-  • Estado: ${fuStatusText.innerText}
-------------------------------------------------
-Generado con Calculadora C.C. Luz del Sur`;
+`;
 
-    navigator.clipboard.writeText(report).then(() => {
-      alert('¡Reporte copiado al portapapeles con éxito! Puedes pegarlo en WhatsApp o correo.');
-    }).catch(() => {
-      alert('No se pudo copiar automáticamente. Por favor toma una captura de pantalla.');
+      navigator.clipboard.writeText(report).then(() => {
+        alert('¡Reporte de Cables copiado al portapapeles con éxito!');
+      }).catch(() => {
+        alert('No se pudo copiar automáticamente. Por favor toma una captura de pantalla.');
+      });
     });
-  });
+  }
+
+  // 8.1 Botón Copiar Reporte: Pestaña 2 (Comparativa Trafo vs. Ternas)
+  if (btnCopiarTrafo) {
+    btnCopiarTrafo.addEventListener('click', () => {
+      const sed = inputSed.value.trim() || 'No especificado';
+      const celda = inputCelda.value.trim() || '-';
+      const fecha = displayFecha ? displayFecha.textContent : fechaHoy;
+      const trafoKva = selectTrafoKva ? selectTrafoKva.value : '';
+      const trafoMaxA = getCapacidadMaxTrafo(trafoKva);
+
+      let totalTernas = 0;
+      let sumaBase = 0;
+
+      configsState.forEach(c => {
+        const cInfo = findCable(c.tipo, c.seccion);
+        const ternas = Number(c.ternas) || 0;
+        totalTernas += ternas;
+        const capBase = cInfo ? cInfo.capacidad * ternas : 0;
+        sumaBase += capBase;
+      });
+
+      const fAgrup = getFactorAgrupamiento(totalTernas);
+      const capFinal = sumaBase * fAgrup;
+
+      const dif = Math.abs(trafoMaxA - capFinal);
+      const resultadoDiagnostico = trafoMaxA > capFinal
+        ? `⚠️ El transformador supera la capacidad de las ternas por ${dif.toFixed(2)} A.`
+        : `✅ Capacidad de ternas adecuada para el transformador con ${dif.toFixed(2)} A de margen.`;
+
+      const report = 
+`⚡ REPORTE COMPARATIVA TRAFO VS. TERNAS - LUZ DEL SUR ⚡
+------------------------------------------------
+Fecha: ${fecha}
+SED: ${sed} | Celda: ${celda}
+
+DATOS DEL TRANSFORMADOR:
+  • Potencia: ${trafoKva ? trafoKva + ' kVA' : 'No seleccionada'}
+  • Capacidad Máxima (120%): ${trafoMaxA.toFixed(2)} A (${trafoKva} × 2.51 × 1.2)
+
+CAPACIDAD DE TERNAS:
+  • Total de Ternas: ${totalTernas}
+  • Factor de Agrupamiento: ${fAgrup}
+  • Capacidad de Ternas: ${capFinal.toFixed(2)} A
+
+RESULTADO COMPARATIVA:
+  • Trafo vs. Ternas: ${trafoMaxA.toFixed(2)} A  VS  ${capFinal.toFixed(2)} A
+  • Estado: ${resultadoDiagnostico}
+`;
+
+      navigator.clipboard.writeText(report).then(() => {
+        alert('¡Reporte de Comparativa Trafo vs. Ternas copiado al portapapeles!');
+      }).catch(() => {
+        alert('No se pudo copiar automáticamente. Por favor toma una captura de pantalla.');
+      });
+    });
+  }
 
   // 9. Modal de Tabla de Referencia
   btnVerTabla.addEventListener('click', () => {

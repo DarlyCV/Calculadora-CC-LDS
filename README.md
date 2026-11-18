@@ -6,6 +6,20 @@ Aplicación web interactiva optimizada para dispositivos móviles diseñada para
 
 ## ⚡ Nueva Lógica Técnica (Corriente I aire + Factor de Agrupamiento)
 
+### 0. Interfaz con Pestañas Móviles
+- **Pestaña 1: ⚡ F.U. de Cables**: Contiene la Configuración General, Selección de Conductores, Cargas R-S-T y el cálculo del Factor de Utilización con su semáforo.
+- **Pestaña 2: 🔌 Trafo vs. Ternas**: Contiene el módulo independiente de evaluación del transformador (kVA, corriente máxima al 120%) enfrentado en tiempo real a la capacidad calculada de las ternas agrupadas.
+- **Sincronización Total**: Todos los datos calculados o ingresados en la primera pestaña se reflejan al instante en la segunda sin necesidad de reescribirlos.
+
+### 1. Módulo de Transformador y Comparativa Trafo vs. Ternas
+- **Capacidades estándar (kVA)**: 630, 550, 500, 400, 350, 315, 250, 160, 100, 75, 50.
+- **Fórmula de Capacidad Máxima (A)**:
+  $$\text{Capacidad Máxima Trafo} = \text{kVA} \times 2.51 \times 1.20$$
+  *(Ejemplo con 630 kVA: $630 \times 2.51 \times 1.2 = \mathbf{1897.56\text{ A}}$)*
+- **Semáforo Comparativo**:
+  - 🔴 **Rojo (Trafo > Ternas)**: El transformador al 120% supera la capacidad de las ternas. Riesgo de sobrecarga en cables.
+  - 🟢 **Verde (Ternas $\ge$ Trafo)**: La capacidad de las ternas es adecuada y soporta la potencia máxima del transformador.
+
 ### 1. Tabla Maestra de Corrientes Admisibles (I aire por terna):
 Valores normalizados para conductores al aire:
 * **N2XY**: 70 (279 A), 120 (400 A), 185 (533 A), 240 (634 A), 300 (736 A), 500 (998 A), 800 (998 A).

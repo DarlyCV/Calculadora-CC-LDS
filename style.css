@@ -151,6 +151,71 @@ body {
   text-transform: uppercase;
 }
 
+/* Main Navigation Tabs */
+.app-nav-tabs {
+  display: flex;
+  background: #002b4d;
+  border-bottom: 2px solid var(--lds-yellow);
+}
+
+.nav-tab-btn {
+  flex: 1;
+  padding: 10px 12px;
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.nav-tab-btn:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.nav-tab-btn.active {
+  color: var(--lds-yellow);
+  background: rgba(0, 43, 77, 0.95);
+}
+
+.nav-tab-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--lds-yellow);
+}
+
+.tab-content-panel {
+  display: none;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.tab-content-panel.active {
+  display: flex;
+}
+
+/* Card Informativa Trafo */
+.trafo-info-card {
+  background: #f8fafc;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  font-size: 11px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
 /* Main Container */
 .app-content {
   padding: 12px;
@@ -488,6 +553,72 @@ body {
   padding: 4px 6px;
   border-radius: 4px;
   text-align: center;
+}
+
+/* Detalle de fórmula de Transformador */
+.trafo-formula-box {
+  margin-top: 8px;
+  background: #f8fafc;
+  border: 1px dashed var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--lds-blue-primary);
+  text-align: center;
+}
+
+/* Comparativa Trafo vs Ternas Card */
+.comparativa-trafo-card {
+  border: 2px solid #1c2d42;
+}
+
+.comparativa-grid {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background: #f0f4f8;
+  padding: 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid #d0dbe6;
+}
+
+.comp-box {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.comp-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+}
+
+.comp-value {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--lds-blue-dark);
+  margin-top: 2px;
+}
+
+.comp-vs {
+  font-size: 12px;
+  font-weight: 900;
+  color: #8c959f;
+  background: #ffffff;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #d0d7de;
+  flex-shrink: 0;
 }
 
 /* Cargas Section */

@@ -42,160 +42,266 @@
       </div>
     </header>
 
+    <!-- Pestañas de Navegación -->
+    <nav class="app-nav-tabs">
+      <button type="button" class="nav-tab-btn active" id="tabBtnCables" data-tab="tabCables">
+        <span>⚡ F.U. de Cables</span>
+      </button>
+      <button type="button" class="nav-tab-btn" id="tabBtnTrafo" data-tab="tabTrafo">
+        <span>🔌 Trafo vs. Ternas</span>
+      </button>
+    </nav>
+
     <div class="app-content">
 
-      <!-- 1. CONFIGURACIÓN GENERAL -->
-      <section class="section-card section-general">
-        <div class="section-header">
-          <span>⚙️ Configuración General</span>
-        </div>
-        <div class="section-body">
-          <div class="grid-2">
-            <!-- SED con Autocompletado / Filtro -->
-            <div class="form-group sed-autocomplete-wrap">
-              <label for="inputSed">SED <small>(Filtrar código)</small></label>
-              <div class="input-with-action">
-                <input type="text" id="inputSed" class="form-control" placeholder="Ej: 00021S" maxlength="10" autocomplete="off" />
-                <button type="button" id="btnClearSed" class="btn-clear-input" title="Limpiar SED" style="display: none;">&times;</button>
-              </div>
-              <div id="sedDropdown" class="autocomplete-dropdown" style="display: none;"></div>
-            </div>
+      <!-- ============================================== -->
+      <!-- PESTAÑA 1: CALCULADORA DE CABLES Y F.U.        -->
+      <!-- ============================================== -->
+      <div id="tabCables" class="tab-content-panel active">
 
-            <!-- Celda -->
-            <div class="form-group">
-              <label for="inputCelda">Celda <small>(1 car. máx)</small></label>
-              <input type="text" id="inputCelda" class="form-control" placeholder="Ej: A, 1" maxlength="1" autocomplete="off" />
-            </div>
+        <!-- 1. CONFIGURACIÓN GENERAL -->
+        <section class="section-card section-general">
+          <div class="section-header">
+            <span>⚙️ Configuración General</span>
           </div>
-
-          <div class="grid-2" style="margin-top: 10px;">
-            <!-- Cantidad de Configuraciones -->
-            <div class="form-group">
-              <label for="inputCantConf">Cant. Conf. <small>(1 al 9)</small></label>
-              <input type="text" id="inputCantConf" class="form-control" placeholder="1" maxlength="1" inputmode="numeric" autocomplete="off" />
-            </div>
-
-            <!-- Material de Cable -->
-            <div class="form-group">
-              <label>Material de Cable</label>
-              <div class="pill-selector">
-                <div class="pill-option">
-                  <input type="radio" id="matCobre" name="material" value="Cobre" checked>
-                  <label for="matCobre" class="pill-label">Cobre</label>
+          <div class="section-body">
+            <div class="grid-2">
+              <!-- SED con Autocompletado / Filtro -->
+              <div class="form-group sed-autocomplete-wrap">
+                <label for="inputSed">SED <small>(Filtrar código)</small></label>
+                <div class="input-with-action">
+                  <input type="text" id="inputSed" class="form-control" placeholder="Ej: 00021S" maxlength="10" autocomplete="off" />
+                  <button type="button" id="btnClearSed" class="btn-clear-input" title="Limpiar SED" style="display: none;">&times;</button>
                 </div>
-                <div class="pill-option">
-                  <input type="radio" id="matAluminio" name="material" value="Aluminio">
-                  <label for="matAluminio" class="pill-label">Aluminio</label>
-                </div>
+                <div id="sedDropdown" class="autocomplete-dropdown" style="display: none;"></div>
+              </div>
+
+              <!-- Celda -->
+              <div class="form-group">
+                <label for="inputCelda">Celda <small>(1 car. máx)</small></label>
+                <input type="text" id="inputCelda" class="form-control" placeholder="Ej: A, 1" maxlength="1" autocomplete="off" />
               </div>
             </div>
-          </div>
-        </div>
-      </section>
 
-      <!-- 2. CONFIGURACIONES DE CABLE -->
-      <section class="section-card">
-        <div class="section-header">
-          <span>⚡ Configuraciones de Cable</span>
-          <button type="button" id="btnVerTabla" class="btn-outline" style="height: 24px; padding: 0 8px; font-size: 10px; border-radius: 4px;">
-            📖 Ver Tabla
+            <div class="grid-2" style="margin-top: 10px;">
+              <!-- Cantidad de Configuraciones -->
+              <div class="form-group">
+                <label for="inputCantConf">Cant. Conf. <small>(1 al 9)</small></label>
+                <input type="text" id="inputCantConf" class="form-control" placeholder="1" maxlength="1" inputmode="numeric" autocomplete="off" />
+              </div>
+
+              <!-- Material de Cable -->
+              <div class="form-group">
+                <label>Material de Cable</label>
+                <div class="pill-selector">
+                  <div class="pill-option">
+                    <input type="radio" id="matCobre" name="material" value="Cobre" checked>
+                    <label for="matCobre" class="pill-label">Cobre</label>
+                  </div>
+                  <div class="pill-option">
+                    <input type="radio" id="matAluminio" name="material" value="Aluminio">
+                    <label for="matAluminio" class="pill-label">Aluminio</label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 2. CONFIGURACIONES DE CABLE -->
+        <section class="section-card">
+          <div class="section-header">
+            <span>⚡ Configuraciones de Cable</span>
+            <button type="button" id="btnVerTabla" class="btn-outline" style="height: 24px; padding: 0 8px; font-size: 10px; border-radius: 4px;">
+              📖 Ver Tabla
+            </button>
+          </div>
+          <div class="section-body">
+            <div id="configList" class="configurations-list">
+              <!-- Filas dinámicas generadas por JS -->
+            </div>
+            <div id="emptyState" class="empty-state" style="display: none;">
+              Ingresa un número en "Cant. Conf." (1 - 9) para desplegar las configuraciones de cable.
+            </div>
+
+            <!-- Resumen de Factor de Agrupamiento y Capacidad Total -->
+            <div id="agrupamientoSummaryBox" class="agrupamiento-summary-box" style="display: none;">
+              <div class="summary-line">
+                <span>Total Ternas: <strong id="lblTotalTernas">0</strong></span>
+                <span>Factor Agrupamiento (F.A.): <strong id="lblFactorAgrup">1.00</strong></span>
+              </div>
+              <div class="summary-formula-line" id="lblFormulaExplicada">
+                (Cap. Base) × F.A. = Capacidad Total
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 3. CARGAS Y LÍMITES -->
+        <section class="section-card">
+          <div class="section-header">
+            <span>📊 Cargas y Límites (Amperios)</span>
+          </div>
+          <div class="section-body">
+            <div class="charges-grid">
+              <div class="phase-card">
+                <span class="phase-label">Fase R</span>
+                <input type="number" id="inputR" class="form-control phase-input" placeholder="0.00" step="0.01" min="0" inputmode="decimal">
+              </div>
+
+              <div class="phase-card">
+                <span class="phase-label">Fase S</span>
+                <input type="number" id="inputS" class="form-control phase-input" placeholder="0.00" step="0.01" min="0" inputmode="decimal">
+              </div>
+
+              <div class="phase-card">
+                <span class="phase-label">Fase T</span>
+                <input type="number" id="inputT" class="form-control phase-input" placeholder="0.00" step="0.01" min="0" inputmode="decimal">
+              </div>
+
+              <div class="max-current-card">
+                <span class="phase-label" style="color: var(--lds-blue-primary);">I. Máx (A)</span>
+                <input type="text" id="inputMaxCurrent" class="form-control disabled phase-input" value="0.00 A" readonly>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 4. F.U. CABLE / RESULTADO -->
+        <section class="section-card result-card">
+          <div class="section-header" style="background: var(--lds-blue-primary); color: #ffffff;">
+            <span>🎯 F.U. Cable / Resultado</span>
+          </div>
+          <div class="section-body">
+            <div class="fu-display-container">
+              <!-- Fórmula y cálculo gráfico -->
+              <div class="fu-fraction-box">
+                <div class="fraction-formula">
+                  <span class="fraction-top" id="fuTopValue">0.00 A</span>
+                  <span class="fraction-bottom" id="fuBottomValue">0.00 A</span>
+                </div>
+
+                <div class="fraction-arrow">➔</div>
+
+                <div class="fu-metric-badge" id="fuMetricBadge">
+                  <div class="fu-metric-value" id="fuPercentage">0.00%</div>
+                  <div class="fu-metric-label">F.U. Cable</div>
+                </div>
+              </div>
+
+              <!-- Semáforo Dinámico -->
+              <div id="fuStatusBanner" class="status-banner normal">
+                <span id="fuStatusIcon">ℹ️</span>
+                <div id="fuStatusText">Ingrese configuraciones y cargas R, S, T para calcular.</div>
+              </div>
+
+              <!-- Barra de capacidad -->
+              <div class="progress-wrap">
+                <div id="progressBarFill" class="progress-bar-fill"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Botones de Acción Pestaña 1 -->
+        <div class="action-buttons">
+          <button type="button" id="btnCopiarCables" class="btn btn-primary">
+            📋 Copiar Reporte Cables
+          </button>
+          <button type="button" id="btnLimpiar" class="btn btn-outline">
+            🔄 Limpiar
           </button>
         </div>
-        <div class="section-body">
-          <div id="configList" class="configurations-list">
-            <!-- Filas dinámicas generadas por JS -->
+
+      </div>
+
+      <!-- ============================================== -->
+      <!-- PESTAÑA 2: COMPARATIVA TRAFO VS. TERNAS        -->
+      <!-- ============================================== -->
+      <div id="tabTrafo" class="tab-content-panel">
+
+        <!-- DATOS DEL TRANSFORMADOR -->
+        <section class="section-card">
+          <div class="section-header">
+            <span>🔌 Datos del Transformador</span>
           </div>
-          <div id="emptyState" class="empty-state" style="display: none;">
-            Ingresa un número en "Cant. Conf." (1 - 9) para desplegar las configuraciones de cable.
-          </div>
-
-          <!-- Resumen de Factor de Agrupamiento y Capacidad Total -->
-          <div id="agrupamientoSummaryBox" class="agrupamiento-summary-box" style="display: none;">
-            <div class="summary-line">
-              <span>Total Ternas: <strong id="lblTotalTernas">0</strong></span>
-              <span>Factor Agrupamiento (F.A.): <strong id="lblFactorAgrup">1.00</strong></span>
-            </div>
-            <div class="summary-formula-line" id="lblFormulaExplicada">
-              (Cap. Base) × F.A. = Capacidad Total
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- 3. CARGAS Y LÍMITES -->
-      <section class="section-card">
-        <div class="section-header">
-          <span>📊 Cargas y Límites (Amperios)</span>
-        </div>
-        <div class="section-body">
-          <div class="charges-grid">
-            <div class="phase-card">
-              <span class="phase-label">Fase R</span>
-              <input type="number" id="inputR" class="form-control phase-input" placeholder="0.00" step="0.01" min="0" inputmode="decimal">
-            </div>
-
-            <div class="phase-card">
-              <span class="phase-label">Fase S</span>
-              <input type="number" id="inputS" class="form-control phase-input" placeholder="0.00" step="0.01" min="0" inputmode="decimal">
-            </div>
-
-            <div class="phase-card">
-              <span class="phase-label">Fase T</span>
-              <input type="number" id="inputT" class="form-control phase-input" placeholder="0.00" step="0.01" min="0" inputmode="decimal">
-            </div>
-
-            <div class="max-current-card">
-              <span class="phase-label" style="color: var(--lds-blue-primary);">I. Máx (A)</span>
-              <input type="text" id="inputMaxCurrent" class="form-control disabled phase-input" value="0.00 A" readonly>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- 4. F.U. CABLE / RESULTADO -->
-      <section class="section-card result-card">
-        <div class="section-header" style="background: var(--lds-blue-primary); color: #ffffff;">
-          <span>🎯 F.U. Cable / Resultado</span>
-        </div>
-        <div class="section-body">
-          <div class="fu-display-container">
-            <!-- Fórmula y cálculo gráfico -->
-            <div class="fu-fraction-box">
-              <div class="fraction-formula">
-                <span class="fraction-top" id="fuTopValue">0.00 A</span>
-                <span class="fraction-bottom" id="fuBottomValue">0.00 A</span>
+          <div class="section-body">
+            <div class="grid-2">
+              <!-- Capacidad del transformador (desplegable) -->
+              <div class="form-group">
+                <label for="selectTrafoKva">Capacidad del Trafo</label>
+                <select id="selectTrafoKva" class="form-control">
+                  <option value="">Seleccione kVA...</option>
+                  <option value="630">630 kVA</option>
+                  <option value="550">550 kVA</option>
+                  <option value="500">500 kVA</option>
+                  <option value="400">400 kVA</option>
+                  <option value="350">350 kVA</option>
+                  <option value="315">315 kVA</option>
+                  <option value="250">250 kVA</option>
+                  <option value="160">160 kVA</option>
+                  <option value="100">100 kVA</option>
+                  <option value="75">75 kVA</option>
+                  <option value="50">50 kVA</option>
+                </select>
               </div>
 
-              <div class="fraction-arrow">➔</div>
-
-              <div class="fu-metric-badge" id="fuMetricBadge">
-                <div class="fu-metric-value" id="fuPercentage">0.00%</div>
-                <div class="fu-metric-label">F.U. Cable</div>
+              <!-- Capacidad Máx. al Auge (A) -->
+              <div class="form-group">
+                <label for="inputTrafoMaxA">Cap. Máx. Trafo (120%)</label>
+                <input type="text" id="inputTrafoMaxA" class="form-control disabled" value="0.00 A" readonly />
               </div>
             </div>
 
-            <!-- Semáforo Dinámico -->
-            <div id="fuStatusBanner" class="status-banner normal">
-              <span id="fuStatusIcon">ℹ️</span>
-              <div id="fuStatusText">Ingrese configuraciones y cargas R, S, T para calcular.</div>
-            </div>
-
-            <!-- Barra de capacidad -->
-            <div class="progress-wrap">
-              <div id="progressBarFill" class="progress-bar-fill"></div>
+            <!-- Detalle de la fórmula del trafo -->
+            <div id="trafoFormulaDetail" class="trafo-formula-box" style="display: none;">
+              <span id="lblTrafoFormulaText">kVA × 2.51 × 1.2 = 0.00 A</span>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <!-- Acciones Rápidas -->
-      <div class="action-buttons">
-        <button type="button" id="btnCopiar" class="btn btn-primary">
-          📋 Copiar Reporte
-        </button>
-        <button type="button" id="btnLimpiar" class="btn btn-outline">
-          🔄 Limpiar
-        </button>
+        <!-- COMPARATIVA: TRAFO VS. TERNAS -->
+        <section class="section-card comparativa-trafo-card">
+          <div class="section-header" style="background: #1c2d42; color: #ffffff;">
+            <span>Comparativa: Trafo vs. Ternas</span>
+          </div>
+          <div class="section-body">
+            <!-- Valores enfrentados sincronizados -->
+            <div class="comparativa-grid">
+              <div class="comp-box">
+                <span class="comp-label">Cap. Máx. Trafo (120%)</span>
+                <span class="comp-value" id="lblCompTrafoVal">0.00 A</span>
+              </div>
+              <div class="comp-vs">VS</div>
+              <div class="comp-box">
+                <span class="comp-label">Capacidad de Ternas</span>
+                <span class="comp-value" id="lblCompTernasVal">0.00 A</span>
+              </div>
+            </div>
+
+            <!-- Semáforo Comparativo Trafo vs Ternas -->
+            <div id="compStatusBanner" class="status-banner normal" style="margin-top: 10px;">
+              <span id="compStatusIcon">ℹ️</span>
+              <div id="compStatusText">Seleccione capacidad del transformador y configure ternas en la pestaña Cables para comparar.</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Resumen de las ternas sincronizadas -->
+        <div class="trafo-info-card">
+          <strong>ℹ️ Nota Técnica:</strong> La <em>Capacidad de Ternas</em> se sincroniza automáticamente en tiempo real desde la pestaña <strong>F.U. de Cables</strong>, aplicando las ternas configuradas y el Factor de Agrupamiento correspondiente.
+        </div>
+
+        <!-- Botones de Acción Pestaña 2 -->
+        <div class="action-buttons">
+          <button type="button" id="btnCopiarTrafo" class="btn btn-primary">
+            📋 Copiar Reporte Trafo
+          </button>
+          <button type="button" id="btnLimpiarTrafo" class="btn btn-outline">
+            🔄 Limpiar Trafo
+          </button>
+        </div>
+
       </div>
 
       <footer class="app-footer">

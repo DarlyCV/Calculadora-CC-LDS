@@ -64,6 +64,20 @@ const FACTORES_AGRUPAMIENTO = {
   5: 0.65
 };
 
+// Potencias estándar de Transformador (kVA)
+const POTENCIAS_TRANSFORMADOR = [630, 550, 500, 400, 350, 315, 250, 160, 100, 75, 50];
+
+// Factor de corriente nominal y factor de sobrecarga/auge
+const FACTOR_I_NOMINAL_TRAFO = 2.51;
+const FACTOR_AUGE_TRAFO = 1.2;
+
+// Calcular capacidad máxima admisible del transformador al auge (A)
+function getCapacidadMaxTrafo(potenciaKva) {
+  const kva = Number(potenciaKva) || 0;
+  if (kva <= 0) return 0;
+  return kva * FACTOR_I_NOMINAL_TRAFO * FACTOR_AUGE_TRAFO;
+}
+
 // Obtener factor de agrupamiento según número de ternas
 function getFactorAgrupamiento(totalTernas) {
   if (totalTernas <= 1) return 1.0;
